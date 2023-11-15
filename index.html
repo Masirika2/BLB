@@ -9,29 +9,31 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1 class="text-center"> BLB TITLES AND CITIZENSHIP MGT SYSTEM</h1>
+  <h1 class="text-center">BLB TITLES AND CITIZENSHIP MGT SYSTEM</h1>
   <div class="container">
     <div class="jumbotron">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4" id="registrationForms">
           <h3>REGISTRATION FORMS</h3>
+          <!-- Citizenship Registration Form -->
           <form id="citizenRegistrationForm">
-            <input type="text" id="citizenName" placeholder="Name">
-            <input type="text" id="dob" placeholder="Date of Birth">
-            <input type="text" id="fatherName" placeholder="Father's Name">
-            <input type="text" id="motherName" placeholder="Mother's Name">
-            <input type="text" id="gender" placeholder="Gender">
-            <input type="text" id="bloodGroup" placeholder="Blood Group">
+            <input type="text" id="citizenName" placeholder="Name"><br><br>
+            <input type="text" id="dob" placeholder="Date of Birth"><br><br>
+            <input type="text" id="fatherName" placeholder="Father's Name"><br><br>
+            <input type="text" id="motherName" placeholder="Mother's Name"><br><br>
+            <input type="text" id="gender" placeholder="Gender"><br><br>
+            <input type="text" id="bloodGroup" placeholder="Blood Group"><br><br>
             <button type="button" onclick="registerCitizen()">Register Citizen</button>
           </form>
+          <!-- Title Registration Form -->
           <h4>Title Registration</h4>
           <form id="titleRegistrationForm">
-            <input type="text" id="ownerName" placeholder="Owner's Name">
-            <input type="text" id="location" placeholder="Location">
-            <input type="text" id="size" placeholder="Size">
-            <input type="text" id="coordinates" placeholder="Coordinates">
-            <input type="text" id="titleNumber" placeholder="Title Number">
-            <input type="text" id="photo" placeholder="Photo">
+            <input type="text" id="ownerName" placeholder="Owner's Name"><br><br>
+            <input type="text" id="location" placeholder="Location"><br><br>
+            <input type="text" id="size" placeholder="Size"><br><br>
+            <input type="text" id="coordinates" placeholder="Coordinates"><br><br>
+            <input type="text" id="titleNumber" placeholder="Title Number"><br><br>
+            <input type="text" id="photo" placeholder="Photo"><br><br>
             <button type="button" onclick="registerTitle()">Register Title</button>
           </form>
         </div>
@@ -73,71 +75,28 @@
       </div>
     </div>
   </div>
+
+  <script>
+    async function fetchAndDisplayData() {
+      try {
+        const response = await fetch('/');
+        const { registeredCitizens, registeredTitles } = await response.json();
+
+        // Update UI to display registered citizens
+        const citizensList = document.getElementById('registeredCitizensList');
+        citizensList.innerHTML = registeredCitizens.map(citizen => `<li>${citizen.name}</li>`).join('');
+
+        // Update UI to display registered titles
+        const titlesList = document.getElementById('registeredTitlesList');
+        titlesList.innerHTML = registeredTitles.map(title => `<li>${title.titleNumber}</li>`).join('');
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    // Call fetchAndDisplayData on page load
+    fetchAndDisplayData();
+  </script>
+  
 </body>
-<!-- Your existing HTML code remains the same -->
-
-<!-- Add the following JavaScript code at the end of the file -->
-
-<script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha384-o3DToTzXVeDg1qBOkzUj4GzHPiYUAfxHwL8v9X1jGsp4/7Y4K7og8R9Xs1P3sGYI" crossorigin="anonymous"></script>
-<script>
-  // Function to register a new citizen
-  function registerCitizen() {
-    // Get form values
-    const name = $('#citizenName').val();
-    const dob = $('#dob').val();
-    const fatherName = $('#fatherName').val();
-    const motherName = $('#motherName').val();
-    const gender = $('#gender').val();
-    const bloodGroup = $('#bloodGroup').val();
-
-    // Make an AJAX request to the server
-    $.post('/registerCitizen', { name, dob, fatherName, motherName, gender, bloodGroup }, function (data) {
-      console.log('Citizen registered:', data);
-    });
-  }
-
-  // Function to register a new title
-  function registerTitle() {
-    // Get form values
-    const ownerName = $('#ownerName').val();
-    const location = $('#location').val();
-    const size = $('#size').val();
-    const coordinates = $('#coordinates').val();
-    const titleNumber = $('#titleNumber').val();
-    const photo = $('#photo').val();
-
-    // Make an AJAX request to the server
-    $.post('/registerTitle', { ownerName, location, size, coordinates, titleNumber, photo }, function (data) {
-      console.log('Title registered:', data);
-    });
-  }
-
-  // Function to perform title transfer
-  function titleTransfer() {
-    // Get form values
-    const titleNumber = $('#transferTitleNumber').val();
-    const newOwnerName = $('#newOwnerName').val();
-
-    // Make an AJAX request to the server
-    $.post('/titleTransfer', { titleNumber, newOwnerName }, function (data) {
-      console.log('Title transferred:', data);
-    });
-  }
-
-  // Function to fetch and display registered citizens and titles
-  function fetchRegisteredData() {
-    // Fetch registered citizens
-    $.get('/registeredCitizens', function (citizens) {
-      console.log('Registered Citizens:', citizens);
-      // Display logic here
-    });
-
-    // Fetch registered titles
-    $.get('/registeredTitles', function (titles) {
-      console.log('Registered Titles:', titles);
-      // Display logic here
-    });
-  }
-</script>
-
 </html>
