@@ -1,105 +1,106 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors'); // Add this line for CORS support
 const app = express();
+let port = process.env.PORT || 3000;
 
-// to the MongoDB
 mongoose.connect('mongodb+srv://masirika:goma2023.com@cluster0.hqy9pky.mongodb.net/BLB?retryWrites=true&w=majority', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
-// Models
-// Models
-const { Citizen, Title } = require('./models'); // Update the require statement
 
-// Body parser middleware
-app.use(bodyParser.urlencoded({ extended: false }));
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'Connection Error: '));
+db.once('open', function () {
+  console.log('Connected to BLB');
+});
+
+const { Citizen, Title } = require('./models');
+
+app.use(cors()); // Enable CORS
 app.use(bodyParser.json());
-
-// Serve static files
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Index route
 app.get('/', (req, res) => {
-  // Render your HTML page here
+  // Send the initial HTML page with registration forms
   res.sendFile(__dirname + '/index.html');
 });
 
-// Citizen registration route
-app.post('/registerCitizen', (req, res) => {
+app.post('/registerCitizen', async (req, res) => {
   const { name, dob, fatherName, motherName, gender, bloodGroup } = req.body;
-  
-  // Create a new Citizen instance
-  const newCitizen = new Citizen({
-    name,
-    dob,
-    fatherName,
-    motherName,
-    gender,
-    bloodGroup
-  });
-
-  // Save the new citizen to the database
-  newCitizen.save()
-    .then(citizen => res.send(citizen))
-    .catch(err => res.status(500).send(err));
+  const newCitizen = new Citizen({ name, dob, fatherName, motherName, gender, bloodGroup });
+  try {
+    await newCitizen.save();
+    console.log('Citizen registered successfully:', newCitizen.toJSON());
+    // Call fetchAndDisplayData to update the UI after successful registration
+    fetchAndDisplayData(res);
+  } catch (error) {
+    console.error('Error saving citizen details:', error);
+    res.status(500).json({ error: 'Error saving citizen details' });
+  }
 });
 
-// Title registration route
-app.post('/registerTitle', (req, res) => {
+app.post('/registerTitle', async (req, res) => {
   const { ownerName, location, size, coordinates, titleNumber, photo } = req.body;
-  
-  // Create a new Title instance
-  const newTitle = new Title({
-    ownerName,
-    location,
-    size,
-    coordinates,
-    titleNumber,
-    photo
-  });
-
-  // Save the new title to the database
-  newTitle.save()
-    .then(title => res.send(title))
-    .catch(err => res.status(500).send(err));
+  const newTitle = new Title({ ownerName, location, size, coordinates, titleNumber, photo });
+  try {
+    await newTitle.save();
+    console.log('Title registered successfully:', newTitle.toJSON());
+    // Call fetchAndDisplayData to update the UI after successful registration
+    fetchAndDisplayData(res);
+  } catch (error) {
+    console.error('Error saving title details:', error);
+    res.status(500).json({ error: 'Error saving title details' });
+  }
 });
 
-// Fetch all registered citizens
-app.get('/registeredCitizens', (req, res) => {
-  Citizen.find()
-    .then(citizens => res.send(citizens))
-    .catch(err => res.status(500).send(err));
+app.post('/titleTransfer', async (req, res) => {
+  const { transferTitleNumber, newOwnerName } = req.body;
+  try {
+    const titleToTransfer = await Title.findOne({ titleNumber: transferTitleNumber });
+    if (!titleToTransfer) {
+      res.status(404).json({ error: 'Title not found' });
+      return;
+    }
+
+    titleToTransfer.ownerName = newOwnerName;
+    await titleToTransfer.save();
+    console.log('Title transferred successfully:', titleToTransfer.toJSON());
+    // Call fetchAndDisplayData to update the UI after successful transfer
+    fetchAndDisplayData(res);
+  } catch (error) {
+    console.error('Error transferring title:', error);
+    res.status(500).json({ error: 'Error transferring title' });
+  }
 });
 
-// Fetch all registered titles
-app.get('/registeredTitles', (req, res) => {
-  Title.find()
-    .then(titles => res.send(titles))
-    .catch(err => res.status(500).send(err));
+// Helper function to fetch data and update the UI
+async function fetchAndDisplayData(res) {
+  try {
+    const registeredCitizens = await Citizen.find({});
+    const registeredTitles = await Title.find({});
+    res.json({
+      registeredCitizens: registeredCitizens,
+      registeredTitles: registeredTitles,
+    });
+  } catch (error) {
+    console.error('Error fetching data from the database:', error);
+    res.status(500).json({ error: 'Error fetching data from the database' });
+  }
+}
+
+const server = app.listen(port, () => {
+  console.log(`Server is running on port ${server.address().port}`);
 });
 
-// Title transfer route
-app.post('/titleTransfer', (req, res) => {
-  const { titleNumber, newOwnerName } = req.body;
-
-  // Find the title by title number
-  Title.findOne({ titleNumber })
-    .then(title => {
-      if (!title) {
-        return res.status(404).send('Title not found');
-      }
-
-      // Update the owner name
-      title.ownerName = newOwnerName;
-
-      // Save the updated title
-      title.save()
-        .then(updatedTitle => res.send(updatedTitle))
-        .catch(err => res.status(500).send(err));
-    })
-    .catch(err => res.status(500).send(err));
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    port += 1;
+    console.log(`Port ${port - 1} is in use, trying port ${port}`);
+    server.listen(port);
+  } else {
+    console.error('An error occurred while starting the server:', err);
+  }
 });
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
