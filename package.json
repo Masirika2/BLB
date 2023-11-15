@@ -1,0 +1,17 @@
+{
+  "name": "blb",
+  "version": "1.0.0",
+  "description": "This project focusses on keeping track of the true ownership of a given piece of land in Buganda kingdom.",
+  "main": "models.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongo": "^0.1.0",
+    "mongoose": "^8.0.0"
+  }
+}
