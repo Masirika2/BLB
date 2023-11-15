@@ -1,19 +1,105 @@
-//this is where your express sever is created and managed
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const app = express();
 
-//do not forget to import the necessary modules,
+// to the MongoDB
+mongoose.connect('mongodb+srv://masirika:goma2023.com@cluster0.hqy9pky.mongodb.net/BLB?retryWrites=true&w=majority', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+// Models
+// Models
+const { Citizen, Title } = require('./models'); // Update the require statement
 
+// Body parser middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-//do not forget to connect to your mongoDb
+// Serve static files
+app.use(express.static('public'));
 
+// Index route
+app.get('/', (req, res) => {
+  // Render your HTML page here
+  res.sendFile(__dirname + '/index.html');
+});
 
+// Citizen registration route
+app.post('/registerCitizen', (req, res) => {
+  const { name, dob, fatherName, motherName, gender, bloodGroup } = req.body;
+  
+  // Create a new Citizen instance
+  const newCitizen = new Citizen({
+    name,
+    dob,
+    fatherName,
+    motherName,
+    gender,
+    bloodGroup
+  });
 
-//do not forget to set up routes to serve out the html file
+  // Save the new citizen to the database
+  newCitizen.save()
+    .then(citizen => res.send(citizen))
+    .catch(err => res.status(500).send(err));
+});
 
-// Do not forget to handle your form posts for the relevant forms
+// Title registration route
+app.post('/registerTitle', (req, res) => {
+  const { ownerName, location, size, coordinates, titleNumber, photo } = req.body;
+  
+  // Create a new Title instance
+  const newTitle = new Title({
+    ownerName,
+    location,
+    size,
+    coordinates,
+    titleNumber,
+    photo
+  });
 
-// Do not forget to handle form gets for the necessary data to display on the user interface.
+  // Save the new title to the database
+  newTitle.save()
+    .then(title => res.send(title))
+    .catch(err => res.status(500).send(err));
+});
 
+// Fetch all registered citizens
+app.get('/registeredCitizens', (req, res) => {
+  Citizen.find()
+    .then(citizens => res.send(citizens))
+    .catch(err => res.status(500).send(err));
+});
 
-//Do not forget to catch all the erros that may arise during the process of parsing data from one form to another.
+// Fetch all registered titles
+app.get('/registeredTitles', (req, res) => {
+  Title.find()
+    .then(titles => res.send(titles))
+    .catch(err => res.status(500).send(err));
+});
 
-// do not forget to create a port for your application and serving out the appliacation via the port created 
+// Title transfer route
+app.post('/titleTransfer', (req, res) => {
+  const { titleNumber, newOwnerName } = req.body;
+
+  // Find the title by title number
+  Title.findOne({ titleNumber })
+    .then(title => {
+      if (!title) {
+        return res.status(404).send('Title not found');
+      }
+
+      // Update the owner name
+      title.ownerName = newOwnerName;
+
+      // Save the updated title
+      title.save()
+        .then(updatedTitle => res.send(updatedTitle))
+        .catch(err => res.status(500).send(err));
+    })
+    .catch(err => res.status(500).send(err));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
