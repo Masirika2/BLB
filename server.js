@@ -1,106 +1,183 @@
 const express = require('express');
+const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const cors = require('cors'); // Add this line for CORS support
-const app = express();
-let port = process.env.PORT || 3000;
-
-mongoose.connect('mongodb+srv://masirika:goma2023.com@cluster0.hqy9pky.mongodb.net/BLB?retryWrites=true&w=majority', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Connection Error: '));
-db.once('open', function () {
-  console.log('Connected to BLB');
-});
-
+const multer = require('multer'); // Add multer for handling file uploads
 const { Citizen, Title } = require('./models');
 
-app.use(cors()); // Enable CORS
-app.use(bodyParser.json());
+const app = express();
+const PORT = 3000;
+
+// MongoDB connection
+mongoose.connect('mongodb+srv://masirika:goma2023.com@cluster0.hqy9pky.mongodb.net/BLB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+
+// Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(bodyParser.json());
 
+// Serve static files from the current directory
+app.use(express.static(__dirname));
+
+// Multer configuration for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// Routes
 app.get('/', (req, res) => {
-  // Send the initial HTML page with registration forms
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/registerCitizen', async (req, res) => {
-  const { name, dob, fatherName, motherName, gender, bloodGroup } = req.body;
-  const newCitizen = new Citizen({ name, dob, fatherName, motherName, gender, bloodGroup });
+// Function to fetch and send the registered citizens and titles
+app.get('/fetchRegisteredData', async (req, res) => {
   try {
-    await newCitizen.save();
-    console.log('Citizen registered successfully:', newCitizen.toJSON());
-    // Call fetchAndDisplayData to update the UI after successful registration
-    fetchAndDisplayData(res);
+    const citizens = await Citizen.find();
+    const titles = await Title.find({}, 'titleNumber');
+    res.json({ citizens, titles });
   } catch (error) {
-    console.error('Error saving citizen details:', error);
-    res.status(500).json({ error: 'Error saving citizen details' });
+    res.status(500).send(error.message);
   }
 });
 
-app.post('/registerTitle', async (req, res) => {
-  const { ownerName, location, size, coordinates, titleNumber, photo } = req.body;
-  const newTitle = new Title({ ownerName, location, size, coordinates, titleNumber, photo });
-  try {
-    await newTitle.save();
-    console.log('Title registered successfully:', newTitle.toJSON());
-    // Call fetchAndDisplayData to update the UI after successful registration
-    fetchAndDisplayData(res);
-  } catch (error) {
-    console.error('Error saving title details:', error);
-    res.status(500).json({ error: 'Error saving title details' });
-  }
+// Route for handling file uploads (photo)
+app.post('/upload', upload.single('photo'), (req, res) => {
+  // Access the uploaded file through req.file
+  const photoBuffer = req.file.buffer;
+  
+  // Implement logic to save the photo buffer to your database or storage
+  // Example: savePhotoToDatabase(photoBuffer);
+
+  // Respond with success or failure
+  res.json({ success: true, message: 'File uploaded successfully' });
 });
 
+// Function to handle the registration form submission
+app.post('/registration', async (req, res) => {
+  try {
+    // Extract data from the form
+    const {
+      name,
+      date_of_birth,
+      father_name,
+      mother_name,
+      gender,
+      blood_group,
+      owner_name,
+      location,
+      land_size,
+      coordinates,
+      title_number,
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !date_of_birth) {
+      res.status(400).send('Name and Date of Birth are required fields');
+      return;
+    }
+
+    // Save Citizen
+    const citizen = new Citizen({
+      name,
+      dateOfBirth: date_of_birth,
+      fatherName: father_name,
+      motherName: mother_name,
+      gender,
+      bloodGroup: blood_group,
+    });
+    await citizen.save();
+
+    // Save Title
+    const title = new Title({
+      ownerName: owner_name,
+      location,
+      landSize: land_size,
+      coordinates,
+      titleNumber: title_number,
+      // Save the photo buffer or path to the photo in the database
+      // Example: photo: 'path/to/photo.jpg'
+    });
+    await title.save();
+
+    // Display the registration success popup
+    res.json({ success: true, message: 'Registration successful!' });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+// Function to handle the title transfer form submission
 app.post('/titleTransfer', async (req, res) => {
-  const { transferTitleNumber, newOwnerName } = req.body;
   try {
-    const titleToTransfer = await Title.findOne({ titleNumber: transferTitleNumber });
-    if (!titleToTransfer) {
+    const { transferTitleNumber, newOwnerName } = req.body;
+
+    // Find the title before the update for the previous owner details
+    const previousTitle = await Title.findOne({ titleNumber: transferTitleNumber });
+
+    // Implement logic to transfer the title and update the database
+    const updatedTitle = await Title.findOneAndUpdate(
+      { titleNumber: transferTitleNumber },
+      { ownerName: newOwnerName },
+      { new: true }
+    );
+
+    if (!updatedTitle) {
       res.status(404).json({ error: 'Title not found' });
       return;
     }
 
-    titleToTransfer.ownerName = newOwnerName;
-    await titleToTransfer.save();
-    console.log('Title transferred successfully:', titleToTransfer.toJSON());
-    // Call fetchAndDisplayData to update the UI after successful transfer
-    fetchAndDisplayData(res);
+    // Display the updated title details in a popup
+    const titleTransferSuccessPopup = {
+      previousOwner: previousTitle.ownerName,
+      titleNumber: updatedTitle.titleNumber,
+      ownerName: updatedTitle.ownerName,
+      location: updatedTitle.location,
+      landSize: updatedTitle.landSize,
+      coordinates: updatedTitle.coordinates,
+    };
+
+    res.json({ title: titleTransferSuccessPopup });
   } catch (error) {
     console.error('Error transferring title:', error);
-    res.status(500).json({ error: 'Error transferring title' });
+    res.status(500).send(error.message);
   }
 });
 
-// Helper function to fetch data and update the UI
-async function fetchAndDisplayData(res) {
+
+// Route for handling title searches
+// Route for handling title searches
+app.post('/titleSearch', async (req, res) => {
   try {
-    const registeredCitizens = await Citizen.find({});
-    const registeredTitles = await Title.find({});
-    res.json({
-      registeredCitizens: registeredCitizens,
-      registeredTitles: registeredTitles,
-    });
-  } catch (error) {
-    console.error('Error fetching data from the database:', error);
-    res.status(500).json({ error: 'Error fetching data from the database' });
-  }
-}
+    const { titleNumber } = req.body;
 
-const server = app.listen(port, () => {
-  console.log(`Server is running on port ${server.address().port}`);
+    console.log('Searching for title with titleNumber:', titleNumber);
+
+    // Implement logic to search for the title based on the title number
+    const title = await Title.findOne({ titleNumber });
+
+    if (!title) {
+      console.log('Title not found for titleNumber:', titleNumber);
+      res.status(404).json({ error: 'Title not found' });
+      return;
+    }
+
+    console.log('Title found:', title);
+
+    // Display the title details in a popup
+    const titleSearchResultPopup = {
+      titleNumber: title.titleNumber,
+      ownerName: title.ownerName,
+      location: title.location,
+      landSize: title.landSize,
+      coordinates: title.coordinates,
+    };
+
+    console.log('Sending title search result:', titleSearchResultPopup);
+    res.json({ title: titleSearchResultPopup });
+  } catch (error) {
+    console.error('Error searching title:', error);
+    res.status(500).send(error.message);
+  }
 });
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    port += 1;
-    console.log(`Port ${port - 1} is in use, trying port ${port}`);
-    server.listen(port);
-  } else {
-    console.error('An error occurred while starting the server:', err);
-  }
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
