@@ -1,10 +1,114 @@
+/* Add this CSS to your style.css file or in the head section of your HTML file */
+
+body {
+    background-color: #f0f0f0; /* Light gray background color */
+}
+
+h1 {
+    background-color: #337ab7; /* Bootstrap primary color */
+    color: white;
+    padding: 15px;
+    margin-bottom: 30px;
+}
+
+.container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.jumbotron {
+    background-color: #fff; /* White background for the form container */
+    padding: 20px;
+    margin-bottom: 20px; /* Add space between the form and other sections */
+    margin-right: 20px;
+}
+
+h3, h4 {
+    color: #337ab7; /* Bootstrap primary color */
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    background-color: #337ab7; /* Bootstrap primary color */
+    color: white;
+}
+
+.btn-success {
+    background-color: #337ab7; /* Bootstrap success color */
+    color: white;
+}
+
+/* Add space between sections */
 .col-md-4 {
+    margin-bottom: 20px;
     border: 3px solid black;
-    margin-top: 30px !important;
     padding: 10px;
 }
-.col-md-8 {
-    border: 3px solid black;
-    margin-top: 30px !important;
+
+/* Style for the registered citizens and titles */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
     padding: 10px;
+    background-color: #fff;
+}
+
+.col-md-8, .col-md-4 {
+    border: 3px solid black;
+    margin-bottom: 20px; /* Add space between the form and other sections */
+    padding: 10px;
+}
+
+/* Add space between form borders */
+.col-md-4:not(:last-child) {
+    margin-right: 20px;
+}
+
+/* Ensure REGISTERED CITIZENS and REGISTERED TITLES are on the same line */
+.row {
+    display: flex;
+}
+
+/* Reduce the size of REGISTERED CITIZENS */
+.col-md-4:first-child {
+    flex: 1;
+}
+
+/* Adjust the size of REGISTERED TITLES */
+.col-md-4:last-child {
+    flex: 1;
+}
+
+/* Popup styles */
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
