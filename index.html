@@ -1,102 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BLB</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLB</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1 class="text-center">BLB TITLES AND CITIZENSHIP MGT SYSTEM</h1>
-  <div class="container">
-    <div class="jumbotron">
-      <div class="row">
-        <div class="col-md-4" id="registrationForms">
-          <h3>REGISTRATION FORMS</h3>
-          <!-- Citizenship Registration Form -->
-          <form id="citizenRegistrationForm">
-            <input type="text" id="citizenName" placeholder="Name"><br><br>
-            <input type="text" id="dob" placeholder="Date of Birth"><br><br>
-            <input type="text" id="fatherName" placeholder="Father's Name"><br><br>
-            <input type="text" id="motherName" placeholder="Mother's Name"><br><br>
-            <input type="text" id="gender" placeholder="Gender"><br><br>
-            <input type="text" id="bloodGroup" placeholder="Blood Group"><br><br>
-            <button type="button" onclick="registerCitizen()">Register Citizen</button>
-          </form>
-          <!-- Title Registration Form -->
-          <h4>Title Registration</h4>
-          <form id="titleRegistrationForm">
-            <input type="text" id="ownerName" placeholder="Owner's Name"><br><br>
-            <input type="text" id="location" placeholder="Location"><br><br>
-            <input type="text" id="size" placeholder="Size"><br><br>
-            <input type="text" id="coordinates" placeholder="Coordinates"><br><br>
-            <input type="text" id="titleNumber" placeholder="Title Number"><br><br>
-            <input type="text" id="photo" placeholder="Photo"><br><br>
-            <button type="button" onclick="registerTitle()">Register Title</button>
-          </form>
+    <h1 class="text-center">BLB TITLES AND CITIZENSHIP MGT SYSTEM</h1>
+
+    <div class="container">
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col-md-4">
+                    <h3>REGISTRATION FORM</h3>
+                    <p>Fill in the details below to register a citizen or a land title.</p>
+                    <!-- Combined Registration Form -->
+                    <form action="/registration" method="post" onsubmit="return registerCitizenAndTitle()">
+                        <!-- Citizen Details -->
+                        <h4>CITIZEN REGISTRATION</h4>
+                        <label for="name">Name:</label>
+                        <input type="text" name="name" id="name" autocomplete="name" required><br><br>
+
+                        <label for="date_of_birth">Date of Birth:</label>
+                        <input type="text" name="date_of_birth" id="date_of_birth" placeholder="YYYY-MM-DD" required><br><br>
+
+                        <label for="father_name">Father's name:</label>
+                        <input type="text" name="father_name" id="father_name" required><br><br>
+
+                        <label for="mother_name">Mother's name:</label>
+                        <input type="text" name="mother_name" id="mother_name" required><br><br>
+
+                        <label for="gender">Gender:</label><br><br>
+                        <select name="gender" id="gender" required>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select><br>
+
+                        <label for="blood_group">Blood group:</label>
+                        <input type="text" name="blood_group" id="blood_group" required><br><br>
+
+                        <!-- Land Title Details -->
+                        <h4>TITLE REGISTRATION</h4>
+                        <label for="owner_name">Name of the owner:</label>
+                        <input type="text" name="owner_name" id="owner_name" placeholder=" Ex: Mugerwa Joseph" required><br><br>
+
+                        <label for="location">Location of the land:</label>
+                        <input type="text" name="location" id="location" placeholder=" Ex: Zirobwe" required><br><br>
+
+                        <label for="land_size">Size of the land:</label>
+                        <input type="text" name="land_size" id="land_size" placeholder=" Ex:50 Decimals" required><br><br>
+
+                        <label for="coordinates">X and Y co-ordinates of the land:</label>
+                        <input type="text" name="coordinates" id="coordinates" placeholder="Ex: 000104, 225012" required><br><br>
+
+                        <label for="title_number">Title Number:</label>
+                        <input type="text" name="title_number" id="title_number" autocomplete=" Ex:custom-title-number" placeholder="L005A" required><br><br>
+                        
+                        <label for="photo">Satellite photo of the land:</label>
+                        <input type="file" name="photo" id="photo" accept="image/*" required><br><br>
+
+                        <!-- Additional Fields (Inserted based on your request) -->
+                        <!-- Make sure to replace the comment with the provided form fields -->
+                        <!-- Rest of the form fields for citizen registration -->
+                       
+
+                        <input type="submit" value="Submit" class="btn btn-primary">
+                    </form>
+                </div>
+
+                <div class="col-md-4">
+                    <h3>REGISTERED CITIZENS</h3>
+                    <!-- Display registered citizens here -->
+                    <ul id="registeredCitizens">
+                        <!-- List of registered citizens will be populated dynamically -->
+                    </ul>
+                </div>
+
+                <div class="col-md-4">
+                    <h3>REGISTERED TITLES</h3>
+                    <!-- Display registered titles here -->
+                    <ul id="registeredTitles">
+                        <!-- List of registered titles will be populated dynamically -->
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="col-md-4">
-          <h3>REGISTERED CITIZENS</h3>
-          <ul id="registeredCitizensList">
-            <!-- Display registered citizens here -->
-          </ul>
-        </div>
-        <div class="col-md-4">
-          <h3>REGISTERED TITLES</h3>
-          <ul id="registeredTitlesList">
-            <!-- Display registered titles here -->
-          </ul>
-        </div>
-      </div>
     </div>
-  </div>
-  <div class="container">
-    <div class="jumbotron">
-      <div class="row">
-        <div class="col-md-8">
-          <h3 class="text-center">TITLE TRANSFER</h3>
-          <form id="titleTransferForm">
-            <input type="text" id="transferTitleNumber" placeholder="Title Number">
-            <input type="text" id="newOwnerName" placeholder="New Owner's Name">
-            <button type="button" onclick="titleTransfer()">Transfer Title</button>
-          </form>
-        </div>
-        <div class="col-md-4">
-          <h4>TITLE SEARCH</h4>
-          <form action="" method="get">
-            <label for="search">TITLE NUMBER:</label>
-            <input type="text" name="" id="" placeholder="TITLE NUMBER">
-            <br>
-            <input type="button" value="SEARCH" class="btn btn-success">
-          </form>
-        </div>
+
+    <div class="container">
+      <div class="jumbotron">
+          <div class="row">
+              <div class="col-md-8">
+                  <h3 class="text-center">TITLE TRANSFER</h3>
+                  <form id="titleTransferForm" onsubmit="return titleTransfer(event)" action="/titleTransfer" method="post">
+                      <input type="text" id="transferTitleNumber" placeholder="Title Number">
+                      <input type="text" id="newOwnerName" placeholder="New Owner's Name">
+                      <button type="submit" class="btn btn-success">Transfer Title</button>
+                  </form>
+              </div>
+
+              <div class="col-md-4">
+                  <h4>TITLE SEARCH</h4>
+                  <form id="titleSearchForm" onsubmit="return titleSearch()">
+                      <label for="search">TITLE NUMBER:</label>
+                      <input type="text" id="search" placeholder="TITLE NUMBER"> <br>
+                      <input type="submit" value="SEARCH" class="btn btn-success">
+                  </form>
+              </div>
+          </div>
       </div>
-    </div>
   </div>
 
-  <script>
-    async function fetchAndDisplayData() {
-      try {
-        const response = await fetch('/');
-        const { registeredCitizens, registeredTitles } = await response.json();
+   <!-- Popups -->
+   <div id="registrationSuccess" class="popup">
+    <p>Registration successful!</p>
+</div>
 
-        // Update UI to display registered citizens
-        const citizensList = document.getElementById('registeredCitizensList');
-        citizensList.innerHTML = registeredCitizens.map(citizen => `<li>${citizen.name}</li>`).join('');
+<div id="titleTransferSuccess" class="popup">
+    <p>Title transfer successful! New owner: <span id="newOwnerNamePopup"></span></p>
+    <p>Title Number: <span id="transferTitleNumberPopup"></span></p>
+    <p>Location: <span id="transferLocationPopup"></span></p>
+    <p>Land Size: <span id="transferLandSizePopup"></span></p>
+    <p>Coordinates: <span id="transferCoordinatesPopup"></span></p>
+</div>
 
-        // Update UI to display registered titles
-        const titlesList = document.getElementById('registeredTitlesList');
-        titlesList.innerHTML = registeredTitles.map(title => `<li>${title.titleNumber}</li>`).join('');
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+<div id="titleSearchResult" class="popup">
+    <p>Title Number: <span id="searchTitleNumberPopup"></span></p>
+    <p>Owner: <span id="searchOwnerPopup"></span></p>
+    <p>Location: <span id="searchLocationPopup"></span></p>
+    <p>Land Size: <span id="searchLandSizePopup"></span></p>
+    <p>Coordinates: <span id="searchCoordinatesPopup"></span></p>
+</div>
+
+  
+<script>
+    // ... (your existing HTML code) ...
+
+    // Function to fetch and update registered citizens and titles
+    async function fetchRegisteredData() {
+        try {
+            const response = await fetch('/fetchRegisteredData');
+            const data = await response.json();
+
+            // Update registered citizens
+            const registeredCitizensList = document.getElementById('registeredCitizens');
+            registeredCitizensList.innerHTML = '';
+            data.citizens.forEach((citizen) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = citizen.name;
+                registeredCitizensList.appendChild(listItem);
+            });
+
+            // Update registered titles
+            const registeredTitlesList = document.getElementById('registeredTitles');
+            registeredTitlesList.innerHTML = '';
+            data.titles.forEach((title) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = title.titleNumber;
+                registeredTitlesList.appendChild(listItem);
+            });
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
     }
 
-    // Call fetchAndDisplayData on page load
-    fetchAndDisplayData();
-  </script>
-  
+// Function to handle the title search form submission
+function titleSearch() {
+    const titleNumber = document.getElementById('search').value;
+
+    if (!titleNumber) {
+        alert('Please enter a Title Number for search.');
+        return false; // Prevent the form from submitting
+    }
+
+    fetch('/titleSearch', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ titleNumber }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server response not ok: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Check if the search was successful
+        if (data.title) {
+            // Inside the titleSearch function, update the popup content assignment
+            const titleSearchResultPopup = document.getElementById('titleSearchResult');
+            titleSearchResultPopup.innerHTML = `<p>Title Number: ${data.title.titleNumber}</p>
+                                    <p>Owner: ${data.title.ownerName}</p>
+                                    <p>Location: ${data.title.location}</p>
+                                    <p>Land Size: ${data.title.landSize || 'Not available'}</p>
+                                    <p>Coordinates: ${data.title.coordinates}</p>`;
+
+            titleSearchResultPopup.style.display = 'block';
+
+            // Optionally, you can close the popup after a few seconds
+            setTimeout(() => {
+                titleSearchResultPopup.style.display = 'none';
+            }, 3000);
+
+            // Clear the search input field
+            document.getElementById('search').value = '';
+        } else {
+            // Display an error message
+            alert('Error searching title. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error searching title:', error);
+        alert('Error searching title. Please try again.');
+    });
+
+    // Prevent the form from submitting
+    return false;
+}
+
+// Function to handle the title transfer form submission
+async function titleTransfer(event) {
+    event.preventDefault();
+
+    const transferTitleNumber = document.getElementById('transferTitleNumber').value;
+    const newOwnerName = document.getElementById('newOwnerName').value;
+
+    if (!transferTitleNumber || !newOwnerName) {
+        alert('Please fill in both Title Number and New Owner fields.');
+        return false;
+    }
+
+    try {
+        const response = await fetch('/titleTransfer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ transferTitleNumber, newOwnerName }),
+        });
+
+        const data = await response.json();
+
+        // Check if the title transfer was successful
+        if (data.title) {
+            // Update registered citizens and titles
+            await fetchRegisteredData();
+
+            // Display the updated title details in the same popup
+            const titleTransferSuccessPopup = document.getElementById('titleTransferSuccess');
+            titleTransferSuccessPopup.innerHTML = `
+                <p>Title transfer successful!</p>
+                <p>Previous owner: ${data.title.previousOwner}</p>
+                <p>Previous Title Number: ${data.title.titleNumber}</p>
+                <p>New owner: ${data.title.ownerName}</p>
+                <p>New Title Number: ${data.title.titleNumber}</p>
+                <p>Location: ${data.title.location}</p>
+                <p>Land Size: ${data.title.landSize}</p>
+                <p>Coordinates: ${data.title.coordinates}</p>
+            `;
+
+            titleTransferSuccessPopup.style.display = 'block';
+
+            // Optionally, you can close the popup after a few seconds
+            setTimeout(() => {
+                titleTransferSuccessPopup.style.display = 'none';
+            }, 5000); // Increased the timeout to 5000 milliseconds (5 seconds)
+
+            alert('Title transfer successful!');
+        } else {
+            // Display an error message
+            alert('Error transferring title. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error transferring title:', error);
+        alert('Error transferring title. Please try again.');
+    }
+
+    return false;
+}
+
+
+
+
+
+
+    // Call fetchRegisteredData on page load
+    window.onload = fetchRegisteredData;
+</script>
 </body>
 </html>
