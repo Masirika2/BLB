@@ -1,23 +1,22 @@
 const mongoose = require('mongoose');
 
-// Citizen Schema
+// Model schemas
 const citizenSchema = new mongoose.Schema({
-  name: String,
-  dob: Date,
-  fatherName: String,
-  motherName: String,
-  gender: String,
-  bloodGroup: String,
+  name: { type: String, required: true },
+  fatherName: { type: String, required: true },
+  motherName: { type: String, required: true },
+  gender: { type: String, required: true },
+  dateOfBirth: { type: String, required: true }, // You can adjust the type as needed
+  bloodGroup: { type: String, required: true },
 });
 
-// Title Schema
 const titleSchema = new mongoose.Schema({
-  ownerName: String,
-  location: String,
-  size: String,
-  coordinates: String,
-  titleNumber: String,
-  photo: String,
+  ownerName: { type: String, required: true },
+  location: { type: String, required: true },
+  landSize: { type: String, required: true },
+  coordinates: { type: String, required: true },
+  titleNumber: { type: String, required: true },
+  photo: { type: String,}, // Assuming you store the file path or URL
 });
 
 const Citizen = mongoose.model('Citizen', citizenSchema);
